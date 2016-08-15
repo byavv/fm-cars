@@ -3,12 +3,18 @@ const boot = require('loopback-boot')
     , http = require('http')
     , loopback = require('loopback')
     , app = module.exports = loopback()
-    , debug = require('debug')('cars');
+    , logger = require("./lib/logger")
+    , debug = require('debug')('ms:cars');
 
 var http_port = process.env.HTTP_PORT || 3044,
-    etcd_host = process.env.ETCD_HOST || "192.168.99.100",
-    rabbit_host = process.env.BROCKER_HOST || "192.168.99.100",
-    mongo_host = process.env.DBSOURCE_HOST || "127.0.0.1";
+    etcd_host = process.env.ETCD_HOST || "localhost",
+    rabbit_host = process.env.BROCKER_HOST || "localhost",
+    mongo_host = process.env.DBSOURCE_HOST || "localhost";
+
+
+if (!process.env.HTTP_HOST) { logger.warn('HTTP_HOST environment is not set, try default (localhost)'); }
+if (!process.env.ETCD_HOST) { logger.warn('ETCD_HOST environment is not set, try default (localhost)'); }
+if (!process.env.BROCKER_HOST) { logger.warn('BROCKER_HOST environment is not set, try default (localhost)'); }
 
 app.set("mongo_host", mongo_host);
 app.set("http_port", http_port);
@@ -18,16 +24,32 @@ app.set("ms_name", 'cars');
 
 boot(app, __dirname, (err) => {
     if (err) throw err;
-    app.start = () => {
-        var httpServer = http.createServer(app);
-        httpServer.listen(http_port, (err) => {           
+    app.start = function () {
+        const httpServer = http.createServer(app).listen(http_port, () => {
             app.emit('started');
             app.close = (done) => {
                 app.removeAllListeners('started');
                 app.removeAllListeners('loaded');
+                if (app.services) {
+                    debug('Leave etcd ...');
+                    app.services.leave(app.get('ms_name'));
+                }
+                if (app.rabbit) {
+                    debug('Close rabbit...');
+                    app.rabbit.closeAll();
+                }
+                httpServer.close(done);
             };
         });
     };
+
+    process.on('SIGINT', () => {
+        debug('Exiting...');
+        app.close((err) => {            
+            process.exit(err ? -1 : 0)
+        });
+    });
+
     if (require.main === module)
         app.start();
     app.loaded = true;

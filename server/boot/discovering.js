@@ -1,4 +1,5 @@
-var registry = require('etcd-registry');
+const registry = require('etcd-registry'),
+    logger = require("../lib/logger");
 /**
  * Service discovering
  */
@@ -10,22 +11,19 @@ module.exports = function (app) {
 
         var services;
         app.once('started', function () {
+            app.services = services;
             services = registry(`${etcd_host}:4001`);
             services.join(microserviceName, { port: http_port });
             setTimeout(() => {
                 services.lookup(microserviceName, (err, service) => {
                     if (service) {
-                        console.log(`Service on ${service.url} registered as ${microserviceName}`);
+                        logger.info(`Service on ${service.url} registered as ${microserviceName}`);
                     } else {
-                        console.log(`Service on ${microserviceName} registration failed`);
+                        logger.error(`Service on ${microserviceName} registration failed`);
+                        throw new Error(`Registration on etcd key storage on ${etcd_host}:4001 failed`)
                     }
                 });
             }, 1000);
         });
-
-        app.close = (done) => {
-            services.leave(microserviceName);
-            console.log(`Service ${microserviceName} stopped`);
-        };
     }
 };

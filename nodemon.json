@@ -1,0 +1,27 @@
+{
+    "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "ms:*",
+        "ETCD_HOST": "localhost"
+    },
+    "ext": "js",
+    "restartable": "rs",
+    "ignore": [
+        ".git",
+        "node_modules/**/node_modules",
+        "/build/*.*",
+        "/.idea/*.*",
+        "/test/*.*",
+        "*.spec.*",
+        "*.json",
+        "/coverage"
+    ],
+    "verbose": true,
+    "execMap": {
+        "js": "node"
+    },
+    "watch": [
+        "server/**/*.js"     
+    ],
+    "pm": "cross-env NODE_ENV=production pm2 start . -i max"
+}

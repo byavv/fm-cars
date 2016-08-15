@@ -1,6 +1,7 @@
 'use strict'
 const rabbit = require('wascally')
-    , debug = require('debug')('cars');
+    , debug = require('debug')('ms:cars')
+    , logger = require("../lib/logger");
 
 module.exports = function (app, done) {
     var Car = app.models.Car;
@@ -63,11 +64,8 @@ module.exports = function (app, done) {
             });
         });
         rabbit.handle('cars.snd.test', (message) => {
-            console.log(message.body)
             message.ack();
         })
-
-
     }
     if (process.env.NODE_ENV != 'test')
         require('../lib/topology')(rabbit, {
@@ -77,11 +75,8 @@ module.exports = function (app, done) {
             .then(handle)
             .then(() => {
                 app.rabbit = rabbit;
-                debug("Rabbit client started");
+                logger.info("Rabbit client started");
             })
             .then(done);
-
-    app.close = () => {
-        rabbit.closeAll();
-    };
 }
+

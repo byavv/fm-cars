@@ -1,6 +1,6 @@
 "use strict"
 const async = require('async')
-    , debug = require('debug')('cars')
+    , debug = require('debug')('ms:cars')
 
 module.exports = function (Car) {
     var app;
