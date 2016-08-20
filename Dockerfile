@@ -18,4 +18,5 @@ RUN npm install
 COPY . /usr/src/app
 
 EXPOSE 3009
+
 CMD [ "npm", "run", "pm2" ]
