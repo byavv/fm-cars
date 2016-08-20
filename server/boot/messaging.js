@@ -3,7 +3,7 @@ const rabbit = require('wascally')
     , debug = require('debug')('ms:cars')
     , logger = require("../lib/logger");
 
-module.exports = function (app, done) {
+module.exports = function (app) {
     var Car = app.models.Car;
     function handle() {
         rabbit.handle('cars.delete.all', (message) => {
@@ -65,18 +65,21 @@ module.exports = function (app, done) {
         });
         rabbit.handle('cars.snd.test', (message) => {
             message.ack();
-        })
+        });
+        app.rabbit = rabbit;
+        logger.info("Rabbit client started");
     }
-    if (process.env.NODE_ENV != 'test')
+
+    app.once('started', () => {
         require('../lib/topology')(rabbit, {
             name: app.get('ms_name'),
             host: app.get("rabbit_host")
         })
             .then(handle)
-            .then(() => {
-                app.rabbit = rabbit;
-                logger.info("Rabbit client started");
+            .catch((err) => {
+                logger.error(`Error when joining rabbit network: ${err}`);
+                throw err;
             })
-            .then(done);
+    });
 }
 
