@@ -18,8 +18,5 @@ RUN npm install
 COPY . /usr/src/app
 
 EXPOSE 3009
-<<<<<<< HEAD
 
-=======
->>>>>>> a0dc2d48ee8f0bd7d2af00d00b62e2472311ac22
 CMD [ "npm", "run", "pm2" ]
