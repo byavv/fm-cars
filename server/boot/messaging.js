@@ -37,7 +37,9 @@ module.exports = function (app) {
         rabbit.handle('cars.update.images', (message) => {
             const carId = message.body.carId;
             const files = message.body.files;
+
             Car.findById(carId, (err, carInst) => {
+
                 if (err || !carInst) { message.nack(); return; }
                 const images = (files || []).map((file) => {
                     return {
@@ -59,15 +61,17 @@ module.exports = function (app) {
                             }
                         }).then(() => {
                             message.ack();
+                        }).catch(err => {
+                            message.nack();
                         });
                 })
             });
         });
-        rabbit.handle('cars.snd.test', (message) => {
-            message.ack();
+
+        rabbit.on("unreachable", () => {
+            logger.error(`Error when joining rabbit network: RabbitMQ is unreachable`);
+            process.exit();
         });
-        app.rabbit = rabbit;
-        logger.info("Rabbit client started");
     }
 
     app.once('started', () => {
@@ -76,10 +80,15 @@ module.exports = function (app) {
             host: app.get("rabbit_host")
         })
             .then(handle)
+            .then(() => {
+                app.rabbit = rabbit;
+                logger.info("Rabbit client started");
+            })
             .catch((err) => {
                 logger.error(`Error when joining rabbit network: ${err}`);
                 throw err;
             })
     });
+    return handle;
 }
 

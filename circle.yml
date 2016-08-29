@@ -1,8 +1,19 @@
 machine:
-  node:
-    version: 6.3.0
+  services:
+    - docker
+
+dependencies:
+  pre:     
+    - docker-compose -v
+    - docker -v
+  override:
+    - docker info
+
 test:
-  override:     
-    - npm run test-cov
+  pre:
+    - git grep --color TODO | cat 
+  override:
+    - docker-compose -f test_compose.yml up cars_test 
   post:
     - bash <(curl -s https://codecov.io/bash)
+    - docker-compose -f test_compose.yml stop

@@ -5,44 +5,45 @@ const assert = chai.assert;
 const should = chai.should();
 const sinon = require('sinon')
 
-const superagent = require('superagent');
+const request = require('supertest');
 const app = require('../server/server');
 var server;
 describe('CAR API TESTS', function () {
 
-  before(function () {
+  before(() => {
     app.rabbit = {
-      publish: sinon.stub()
+      publish: sinon.stub(),
+      closeAll: () => { }
     }
   });
 
-  beforeEach(function (done) {
+  before((done) => {
     server = app.listen('3010', done);
   });
 
-  afterEach(function (done) {
+  after((done) => {
     server.close(done);
   });
 
-  it('should get cars from database', function (done) {
-    superagent
-      .get('http://localhost:3010/api/Cars/')
+  it('should get cars from database', (done) => {
+    request(app)
+      .get('/api/cars/')
       .set('Content-Type', 'application/json')
-      .end(function (err, result) {
+      .expect(200)
+      .end((err, result) => {
         if (err) { return done(err); }
-        assert.equal(result.status, 200);
         result.body.should.be.a('array');
         done();
       });
   });
 
-  it('should create new car', function (done) {
-    superagent
-      .post('http://localhost:3010/api/Cars/new')
+  it('should create new car', (done) => {
+    request(app)
+      .post('/api/Cars/new')
       .send({ makerName: 'SUPERCAR', modelName: 'X3' })
       .set('Content-Type', 'application/json')
       .set('X-PRINCIPLE', 'user-id')
-      .end(function (err, result) {
+      .end((err, result) => {
         if (err) { return done(err); }
         assert.equal(result.status, 200);
         assert.equal(result.body.car.makerName, 'SUPERCAR');
@@ -60,31 +61,27 @@ describe('CAR API TESTS', function () {
       })
   });
 
-  it('should fire 400 error code if principle is not set', function (done) {
-    superagent
-      .post('http://localhost:3010/api/Cars/getusercars')
+  it('should fire 400 error code if principle is not set', (done) => {
+    request(app)
+      .post('/api/Cars/getusercars')
       .set('Content-Type', 'application/json')
-      //.set('X-PRINCIPLE', 'user-id')
-      .end((err, result) => {
-        assert.equal(result.status, 400);
-        should.exist(err);
-        done();
-      })
+      .expect(400)
+      .end(done)
   });
 
-  it('should delete car', function (done) {
-    superagent
-      .post('http://localhost:3010/api/Cars/new')
+  it('should delete car', (done) => {
+    request(app)
+      .post('/api/Cars/new')
       .send({ makerName: 'SUPERCAR', modelName: 'X3' })
       .set('Content-Type', 'application/json')
       .set('X-PRINCIPLE', 'user-id')
       .end((err, result) => {
         if (err) { return done(err); }
         let id = result.body.car.id
-        superagent
-          .delete(`http://localhost:3010/api/Cars/${id}`)
+        request(app)
+          .delete(`/api/Cars/${id}`)
           .set('X-PRINCIPLE', 'user-id')
-          .end(function (err, result) {
+          .end((err, result) => {
             if (err) { return done(err); }
             assert.equal(result.status, 200);
             done();

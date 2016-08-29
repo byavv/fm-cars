@@ -1,0 +1,29 @@
+version: '2'
+services:
+  cars_test:    
+    build: ./
+    environment:        
+      - NODE_ENV=test
+      - BROCKER_HOST=rabbitmq
+      - HTTP_PORT=8080
+    depends_on:      
+      - tracker
+      - image
+      - rabbitmq 
+    entrypoint: ./wait-for-it.sh tracker:8080 image:8080 rabbitmq:5672 -s -- npm run test-cov    
+  tracker:    
+    image: aksenchyk/fm-tracker 
+    environment:        
+      - NODE_ENV=test
+      - BROCKER_HOST=rabbitmq
+      - HTTP_PORT=8080
+    command: npm run dev
+  image:
+    image: aksenchyk/fm-image
+    environment:        
+      - NODE_ENV=test
+      - BROCKER_HOST=rabbitmq
+      - HTTP_PORT=8080
+    command: npm run dev    
+  rabbitmq:
+    image: rabbitmq:latest
