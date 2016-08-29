@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/byavv/fm-cars.svg?style=svg)](https://circleci.com/gh/byavv/fm-cars)
+[![](https://images.microbadger.com/badges/image/aksenchyk/fm-cars.svg)](https://microbadger.com/images/aksenchyk/fm-cars "Provided by microbadger.com")
 
 ## Microservice cars for [funny-market](https://github.com/byavv/funny-market) project
 
