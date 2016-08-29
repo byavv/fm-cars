@@ -5,7 +5,8 @@ machine:
     - docker
 
 dependencies:
-  pre:     
+  pre:
+    - pip install docker-compose       
     - docker-compose -v
     - docker -v
   override:
