@@ -5,8 +5,9 @@ services:
     environment:        
       - NODE_ENV=test
       - BROCKER_HOST=rabbitmq
-      - HTTP_PORT=8080
-      - CI_ENV=`bash <(curl -s https://codecov.io/env)`
+      - HTTP_PORT=8080    
+    env_file:
+      - ./circle.env
     depends_on:      
       - tracker
       - image

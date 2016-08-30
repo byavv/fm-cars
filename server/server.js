@@ -11,6 +11,7 @@ var http_port = process.env.HTTP_PORT || 3044,
     rabbit_host = process.env.BROCKER_HOST || "localhost",
     mongo_host = process.env.DBSOURCE_HOST || "localhost";
 
+console.log('RRRRRRRRRRRRRRRRRRRRRRRRRRR', process.env.CIRCLECI);
 
 if (!process.env.HTTP_HOST) { logger.warn('HTTP_HOST environment is not set, try default (localhost)'); }
 if (!process.env.ETCD_HOST) { logger.warn('ETCD_HOST environment is not set, try default (localhost)'); }
