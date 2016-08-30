@@ -9,6 +9,9 @@ WORKDIR /usr/src/app
 # Create app directory
 RUN mkdir -p /usr/src/app
 
+# Share volume for coverage report
+VOLUME /coverage
+
 # Install app dependencies
 COPY package.json /usr/src/app/
 RUN npm install
