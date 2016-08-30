@@ -1,15 +1,16 @@
 'use strict'
-const rabbit = require('wascally')
-    , debug = require('debug')('ms:cars')
+const //rabbit = require('rabbot')
+   // , 
+    debug = require('debug')('ms:cars')
     , logger = require("../lib/logger");
 
 module.exports = function (app) {
     var Car = app.models.Car;
-    function handle() {
-        rabbit.handle('cars.delete.all', (message) => {
+    function configureHandlers(rabbit) {
+        rabbit.handle('cars.delete.all', (message) => {          
             debug(`Deleting cars for user: ${message.body}`)
-            Car.destroyAll({ userId: message.body }, (err, info, count) => {
-                if (err) {
+            Car.destroyAll({ userId: message.body }, (err, info, count) => {                
+                if (err) {                   
                     message.nack();
                 } else {
                     message.reply(info);
@@ -39,7 +40,6 @@ module.exports = function (app) {
             const files = message.body.files;
 
             Car.findById(carId, (err, carInst) => {
-
                 if (err || !carInst) { message.nack(); return; }
                 const images = (files || []).map((file) => {
                     return {
@@ -68,27 +68,27 @@ module.exports = function (app) {
             });
         });
 
-        rabbit.on("unreachable", () => {
+        rabbit.on('unreachable', () => {
             logger.error(`Error when joining rabbit network: RabbitMQ is unreachable`);
-            process.exit();
+            throw new Error(`RabbitMQ is unreachable on ${app.get("rabbit_host")}:5672`);
         });
     }
 
     app.once('started', () => {
+        const rabbit = require('rabbot');
         require('../lib/topology')(rabbit, {
             name: app.get('ms_name'),
-            host: app.get("rabbit_host")
+            host: app.get('rabbit_host')
         })
-            .then(handle)
+            .then(()=>configureHandlers(rabbit))
             .then(() => {
                 app.rabbit = rabbit;
-                logger.info("Rabbit client started");
+                logger.info('Rabbit client started');                
             })
             .catch((err) => {
-                logger.error(`Error when joining rabbit network: ${err}`);
+                logger.error(`Error establishing RabbitMq connection: ${err}`);                
                 throw err;
             })
     });
-    return handle;
+    return configureHandlers;
 }
-

@@ -11,7 +11,12 @@ RUN mkdir -p /usr/src/app
 
 # Install app dependencies
 COPY package.json /usr/src/app/
+
 RUN npm install
+
+RUN mkdir -p /coverage
+
+VOLUME /usr/src/app/coverage
 
 # Copy app sources
 COPY . /usr/src/app

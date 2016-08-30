@@ -9,50 +9,47 @@ const superagent = require('superagent');
 const app = require('../server/server');
 const messaging = require('../server/boot/messaging');
 const request = require("supertest")(app)
-var server, server2;
-var Car;
-var rabbitClient;
-describe('INTERGRATION TESTS', function () {
-    const rabbit = require('wascally')
-    before(function (done) {
 
-        require('./init-server')(app, () => {
-            Car = app.models.Car;
-            require('../server/lib/topology')(rabbit, {
-                name: 'cars',
-                host: 'localhost'
-            })
-                .then(messaging(app).handle)
-                .then(() => {
-                    console.log('connection establishers');
-                    rabbitClient = rabbit;
-                    done()
-                })
-                .catch((err) => {
-                    logger.error(`Error when joining rabbit network: ${err}`);
-                    throw err;
-                });
-        })
+let Car, client;
+
+describe('INTERGRATION TESTS', () => {
+
+    before(function (done) {
+        require('./init-server')(app, done)
     });
 
     after((done) => {
-        app.rabbit.closeAll();
+        client.closeAll();
         app.close(done)
     });
 
 
-    it('Integration: should delete all cars from database', (done) => {
-        rabbitClient.request('ex.cars', {
+    before((done) => {
+        client = require('rabbot');
+        Car = app.models.Car;
+
+        require('../server/lib/topology')(client, {
+            name: 'cars',
+            host: app.get('rabbit_host')
+        })
+            .then(done)
+            .catch((err) => {
+                done(err);
+            })
+    })
+
+    it('Integration: Should delete all cars from database by userId and delete images from storage', (done) => {
+
+        client.request('ex.cars', {
             routingKey: "requests",
             type: 'cars.delete.all',
+            contentType: "application/json",
             body: '1'
         })
-            .then((final) => {
-                console.log("ALL BOUND CARS WAS DELETED: ", final.body);
+            .then((final) => {                
                 final.ack();
             })
             .then(() => {
-                console.log('GOT THOMETHING')
                 Car.find({}, (err, cars) => {
                     assert.equal(cars.length, 1);
                     done();
@@ -63,13 +60,14 @@ describe('INTERGRATION TESTS', function () {
             });
     });
 
-    it('Should update cars images', (done) => {
+    it('Integration: Should update cars images and notify tracker', (done) => {
         Car.find({}, (err, cars) => {
             assert.equal(cars.length, 1);
             const id = cars[0].id;
-            rabbitClient.publish('ex.cars', {
+            client.publish('ex.cars', {
                 type: 'cars.update.images',
                 routingKey: "messages",
+                contentType: "application/json",
                 body: {
                     carId: id,
                     files: [

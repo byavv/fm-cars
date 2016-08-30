@@ -49,7 +49,7 @@ module.exports = function seedTestData(app, done) {
                 price: 0,
                 added: Date.now(),
                 makerName: 'gravitsapa motors co.',
-                modelName: 'pepelats',
+                modelName: 'pepelats turbo',
                 color: 'cosmos',
                 makerId: 1,
                 carModelId: 1,               

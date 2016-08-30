@@ -4,7 +4,7 @@
 ## Microservice cars for [funny-market](https://github.com/byavv/funny-market) project
 
 ### Features: 
-- [rabbitmq](https://www.rabbitmq.com/) messaging via [wascally](https://github.com/LeanKit-Labs/wascally)
+- [rabbitmq](https://www.rabbitmq.com/) messaging via [rabbot](https://github.com/arobson/rabbot)
 - [etcd](https://github.com/coreos/etcd) self-registration via [etcd-registry](https://github.com/mafintosh/etcd-registry)
 
 ### Usage

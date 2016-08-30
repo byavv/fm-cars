@@ -2,10 +2,8 @@ version: '2'
 services:
   cars_test:    
     build: ./
-    environment:        
-      - NODE_ENV=test
-      - BROCKER_HOST=rabbitmq
-      - HTTP_PORT=8080 
+    environment:
+      # codecov.io requires this variables
       - CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM  
       - CIRCLECI=$CIRCLECI
       - CIRCLE_BUILD_NUM = $CIRCLE_BUILD_NUM
@@ -17,25 +15,28 @@ services:
       - CIRCLE_PROJECT_REPONAME=$CIRCLE_PROJECT_REPONAME
       - CIRCLE_ARTIFACTS=$CIRCLE_ARTIFACTS
     env_file:
-      - ./circle.env
+      - ./test_.env
     depends_on:      
       - tracker
       - image
       - rabbitmq 
-    entrypoint: ./wait-for-it.sh tracker:8080 image:8080 rabbitmq:5672 -s -- npm run test-cov    
+    entrypoint: ./wait-for-it.sh tracker:8080 image:8080 rabbitmq:5672 -s -- npm run test    
   tracker:    
     image: aksenchyk/fm-tracker 
-    environment:        
-      - NODE_ENV=test
-      - BROCKER_HOST=rabbitmq
-      - HTTP_PORT=8080
+    depends_on: 
+      - rabbitmq
+    env_file:
+      - ./test_.env
     command: npm run dev
   image:
     image: aksenchyk/fm-image
-    environment:        
-      - NODE_ENV=test
-      - BROCKER_HOST=rabbitmq
-      - HTTP_PORT=8080
+    depends_on: 
+      - rabbitmq
+    env_file:
+      - ./test_.env
     command: npm run dev    
   rabbitmq:
     image: rabbitmq:latest
+    ports:
+      - '5672:5672'
+      - '15672:15672' 

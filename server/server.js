@@ -11,8 +11,6 @@ var http_port = process.env.HTTP_PORT || 3044,
     rabbit_host = process.env.BROCKER_HOST || "localhost",
     mongo_host = process.env.DBSOURCE_HOST || "localhost";
 
-console.log('RRRRRRRRRRRRRRRRRRRRRRRRRRR', process.env.CIRCLECI);
-
 if (!process.env.HTTP_HOST) { logger.warn('HTTP_HOST environment is not set, try default (localhost)'); }
 if (!process.env.ETCD_HOST) { logger.warn('ETCD_HOST environment is not set, try default (localhost)'); }
 if (!process.env.BROCKER_HOST) { logger.warn('BROCKER_HOST environment is not set, try default (localhost)'); }
@@ -41,15 +39,9 @@ boot(app, __dirname, (err) => {
                 }
                 httpServer.close(done);
             };
+            process.on('SIGINT', app.close);
         });
     };
-
-    process.on('SIGINT', () => {
-        debug('Exiting...');
-        app.close((err) => {            
-            process.exit(err ? -1 : 0)
-        });
-    });
 
     if (require.main === module)
         app.start();

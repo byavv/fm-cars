@@ -5,9 +5,10 @@
   "main": "server/server.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node .",
-    "test": "cross-env NODE_ENV=test DEBUG=test istanbul cover node_modules/mocha/bin/_mocha -- -R spec test/*.spec.js",
+    "test": "cross-env NODE_ENV=test DEBUG=test istanbul cover -x *.ex.js node_modules/mocha/bin/_mocha -- -R spec test/*.spec.js",
+    "test:unit":"cross-env NODE_ENV=test DEBUG=test istanbul cover -x *.ex.js node_modules/mocha/bin/_mocha -- -R spec test/*.u.spec.js",
     "dev": "cross-env NODE_ENV=development DEBUG=ms:* node .",
-    "test-cov": "cross-env NODE_ENV=test istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec test/*.spec.js && cat ./coverage/lcov.info | ./node_modules/.bin/codecov",
+    "test-cov": "cross-env NODE_ENV=test istanbul cover -x *.ex.js ./node_modules/mocha/bin/_mocha -- -R spec test/*.spec.js && cat ./coverage/lcov.info | ./node_modules/.bin/codecov",
     "clean": "npm run clean:coverage && npm run clean:temp && npm run clean:build",
     "clean:coverage": "rm -rf ./coverage",
     "clean:temp": "rm -rf ./tmp/*",
@@ -34,8 +35,8 @@
     "loopback-connector-mongodb": "1.13.0",
     "loopback-datasource-juggler": "^2.46.0",
     "loopback-ds-timestamp-mixin": "^3.2.4",
+    "rabbot": "^1.0.5",
     "sift": "^3.2.1",
-    "wascally": "^0.2.10",
     "winston": "^2.2.0"
   },
   "devDependencies": {
@@ -55,5 +56,3 @@
   },
   "description": "cars api microservice"
 }
-
-

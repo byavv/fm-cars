@@ -5,6 +5,6 @@ module.exports = function (app, done) {
         app.start(3010);
     })
     app.once('started', () => {
-        done(app)
+        done()
     });
 };

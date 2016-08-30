@@ -1,6 +1,6 @@
 "use strict"
 const async = require('async')
-    , debug = require('debug')('ms:cars')
+    , debug = require('debug')('ms:cars, test')
 
 module.exports = function (Car) {
     var app;
@@ -37,12 +37,12 @@ module.exports = function (Car) {
         debug(`Deleted ${ctx.Model.pluralModelName} matching ${JSON.stringify(ctx.where)}`);
         Car.find({ where: ctx.where }, function (err, cars) {
             if (cars) {
-                cars.forEach((car) => {
+                cars.forEach((car) => {                 
                     if (app.rabbit) {
                         app.rabbit.publish('ex.image', {
                             routingKey: "messages",
                             type: "image.delete",
-                            body: car.images
+                            body: new Buffer(car.images)
                         })
                         app.rabbit.publish('ex.tracker', {
                             type: "tracker.delete",

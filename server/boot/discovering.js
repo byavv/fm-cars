@@ -1,3 +1,4 @@
+'use strict'
 const etcdRegistry = require('etcd-registry'),
     logger = require("../lib/logger");
 /**

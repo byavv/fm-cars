@@ -1,5 +1,4 @@
-//var async = require("async");
-
+'use strict'
 module.exports = function (app, cb) {
     var CarModel = app.models.CarModel;
     var Maker = app.models.Maker;
