@@ -22,3 +22,10 @@
     npm run clean
     npm run serve
 
+### Docker
+
+```sh
+bash build.sh
+docker-compose -f test_compose.yml up cars_test 
+```
+

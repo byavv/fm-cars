@@ -1,7 +1,7 @@
 version: '2'
 services:
   cars_test:    
-    build: ./
+    image: aksenchyk/fm-cars:build
     environment:
       # codecov.io requires this variables
       - CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM  
@@ -22,14 +22,14 @@ services:
       - rabbitmq 
     entrypoint: ./wait-for-it.sh tracker:8080 image:8080 rabbitmq:5672 -s -- npm run test    
   tracker:    
-    image: aksenchyk/fm-tracker 
+    image: aksenchyk/fm-tracker:latest 
     depends_on: 
       - rabbitmq
     env_file:
       - ./test_.env
     command: npm run dev
   image:
-    image: aksenchyk/fm-image
+    image: aksenchyk/fm-image:latest
     depends_on: 
       - rabbitmq
     env_file:

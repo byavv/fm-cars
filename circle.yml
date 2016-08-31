@@ -11,6 +11,8 @@ dependencies:
     - docker -v
   override:
     - docker info
+    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -t aksenchyk/fm-cars:build .
 
 test:
   pre:
@@ -21,7 +23,13 @@ test:
     - docker-compose -f test_compose.yml stop
 
 deployment:
-  hub:
+  hub_latest:
     branch: master
-    commands:
-      - $TRIGGER_DOCKER_HUB_BUILD     
+    commands:     
+      - docker tag aksenchyk/fm-cars:build aksenchyk/fm-cars:latest   
+      - docker push aksenchyk/fm-cars:latest
+  hub_release:    
+    tag: /.*/ 
+    commands:     
+      - docker tag aksenchyk/fm-cars:build aksenchyk/fm-cars:$CIRCLE_TAG    
+      - docker push aksenchyk/fm-cars:$CIRCLE_TAG   
