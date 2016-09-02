@@ -1,16 +1,19 @@
 'use strict'
-const //rabbit = require('rabbot')
-   // , 
-    debug = require('debug')('ms:cars')
+const rabbit = require('rabbot')
+    , debug = require('debug')('ms:cars')
     , logger = require("../lib/logger");
 
 module.exports = function (app) {
+    rabbit.on('unreachable', () => {
+        logger.error(`Error connecting RabbitMQ instance on ${app.get("rabbit_host")}:5672: UNREACHABLE`);
+        process.exit(1);
+    });
     var Car = app.models.Car;
     function configureHandlers(rabbit) {
-        rabbit.handle('cars.delete.all', (message) => {          
+        rabbit.handle('cars.delete.all', (message) => {
             debug(`Deleting cars for user: ${message.body}`)
-            Car.destroyAll({ userId: message.body }, (err, info, count) => {                
-                if (err) {                   
+            Car.destroyAll({ userId: message.body }, (err, info, count) => {
+                if (err) {
                     message.nack();
                 } else {
                     message.reply(info);
@@ -67,26 +70,20 @@ module.exports = function (app) {
                 })
             });
         });
-
-        rabbit.on('unreachable', () => {
-            logger.error(`Error when joining rabbit network: RabbitMQ is unreachable`);
-            throw new Error(`RabbitMQ is unreachable on ${app.get("rabbit_host")}:5672`);
-        });
     }
 
     app.once('started', () => {
-        const rabbit = require('rabbot');
         require('../lib/topology')(rabbit, {
             name: app.get('ms_name'),
             host: app.get('rabbit_host')
         })
-            .then(()=>configureHandlers(rabbit))
+            .then(() => configureHandlers(rabbit))
             .then(() => {
                 app.rabbit = rabbit;
-                logger.info('Rabbit client started');                
+                logger.info('Rabbit client started');
             })
             .catch((err) => {
-                logger.error(`Error establishing RabbitMq connection: ${err}`);                
+                logger.error(`Error establishing RabbitMq connection: ${err}`);
                 throw err;
             })
     });
